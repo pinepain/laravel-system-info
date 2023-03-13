@@ -1,0 +1,45 @@
+{
+  "name": "pinepain/laravel-system-info",
+  "description": "Set of tools to help maintaining a Laravel application in kubernetes ",
+  "keywords": ["laravel", "devops", "sre", "k8s", "kubernetes"],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Bohdan Padalko",
+      "email": "thepinepain@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.0",
+    "illuminate/support": "^8.0|^9.0|^10.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^8.",
+    "phpunit/phpunit": "^10.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pinepain\\SystemInfo\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Pinepain\\SystemInfo\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Pinepain\\SystemInfo\\SystemInfoServiceProvider"
+      ]
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
