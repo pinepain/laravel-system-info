@@ -10,7 +10,7 @@ use Pinepain\SystemInfo\Checkers\StatusChecker;
 
 class StatusCommand extends Command
 {
-    protected $signature = 'system-info:status {components* : Individual component names to check } 
+    protected $signature = 'system-info:status {components?* : Individual component names to check }
             {--fast : Fail fast on first faulty component}
     ';
 
