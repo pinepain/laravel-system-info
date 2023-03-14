@@ -3,7 +3,10 @@
 namespace Pinepain\SystemInfo\Checkers;
 
 
-class Result implements \JsonSerializable
+use JsonSerializable;
+
+
+class Result implements JsonSerializable
 {
     private bool $healthy;
     private array $details;
@@ -24,12 +27,11 @@ class Result implements \JsonSerializable
         return $this->details;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return [
             'healthy' => $this->healthy,
             'details' => $this->details,
         ];
     }
-
 }

@@ -3,7 +3,7 @@
 namespace Pinepain\SystemInfo\Checkers;
 
 
-class StatusChecker
+class AggregateStatusChecker implements CheckerInterface
 {
     /**
      * @var \Pinepain\SystemInfo\Checkers\CheckerInterface[]
@@ -17,11 +17,14 @@ class StatusChecker
 
     public function getName(): string
     {
-        return 'status';
+        return 'aggregate';
     }
 
-    public function check(bool $failFast = true, string ...$components): Result
+    public function check(mixed ...$args): Result
     {
+        $failFast = $args['failFast'] ?? true;
+        $components = $args['components'] ?? [];
+
         $checks = [];
         $healthy = true;
 
@@ -31,7 +34,7 @@ class StatusChecker
         }
 
         foreach ($checkers as $name => $checker) {
-            $result = $checker->check($failFast);
+            $result = $checker->check(failFast: $failFast);
             $checks[$name] = $result;
             $healthy = $healthy && $result->isHealthy();
 

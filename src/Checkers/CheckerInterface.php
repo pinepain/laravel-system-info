@@ -6,5 +6,5 @@ namespace Pinepain\SystemInfo\Checkers;
 interface CheckerInterface
 {
     public function getName(): string;
-    public function check(bool $failFast = true): Result;
+    public function check(...$args): Result;
 }

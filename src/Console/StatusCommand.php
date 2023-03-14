@@ -5,7 +5,7 @@ namespace Pinepain\SystemInfo\Console;
 
 use Illuminate\Console\Command;
 use Pinepain\SystemInfo\Checkers\Result;
-use Pinepain\SystemInfo\Checkers\StatusChecker;
+use Pinepain\SystemInfo\Checkers\AggregateStatusChecker;
 
 
 class StatusCommand extends Command
@@ -16,7 +16,7 @@ class StatusCommand extends Command
 
     protected $description = 'Output app status';
 
-    public function handle(StatusChecker $checker)
+    public function handle(AggregateStatusChecker $checker)
     {
         $res = $checker->check($this->option('fast'), ...$this->argument('components'));
 

@@ -6,10 +6,8 @@ namespace Pinepain\SystemInfo;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Pinepain\SystemInfo\Checkers\CacheStatusChecker;
-use Pinepain\SystemInfo\Checkers\DatabasesStatusChecker;
-use Pinepain\SystemInfo\Checkers\RedisStatusChecker;
-use Pinepain\SystemInfo\Checkers\StatusChecker;
+use Pinepain\SystemInfo\Checkers\CheckerInterface;
+use Pinepain\SystemInfo\Checkers\AggregateStatusChecker;
 use Pinepain\SystemInfo\Console\GenTokenCommand;
 use Pinepain\SystemInfo\Console\PingCommand;
 use Pinepain\SystemInfo\Console\StatusCommand;
@@ -110,19 +108,30 @@ class SystemInfoServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->singleton(StatusChecker::class, function () {
-            return new StatusChecker(
-                new DatabasesStatusChecker(),
-                new RedisStatusChecker(),
-                new CacheStatusChecker(),
-            );
+        $this->app->singleton(AggregateStatusChecker::class, function (\Illuminate\Contracts\Foundation\Application $app) {
+            $statusCheckers = (array)config('system-info.status-checkers', []);
+
+            $prebuilt = [];
+            foreach ($statusCheckers as $checker) {
+                if (!is_string($checker)) {
+                    continue;
+                }
+
+                $checker = $app->make($checker);
+
+                if ($checker instanceof CheckerInterface) {
+                    $prebuilt[] = $checker;
+                }
+            }
+
+            return new AggregateStatusChecker(...$prebuilt);
         });
     }
 
     public function provides()
     {
         return [
-            StatusChecker::class,
+            AggregateStatusChecker::class,
         ];
     }
 }

@@ -15,8 +15,10 @@ class RedisStatusChecker implements CheckerInterface
         return 'redis';
     }
 
-    public function check(bool $failFast = true): Result
+    public function check(mixed ...$args): Result
     {
+        $failFast = $args['failFast'] ?? true;
+
         $checks = [];
         $healthy = true;
 
@@ -24,9 +26,9 @@ class RedisStatusChecker implements CheckerInterface
 
         unset($connectionsConfig['client']);
         unset($connectionsConfig['options']);
-        unset($connectionsConfig['clusters']); // yup, no clustering support atm, feels free to open PR or sound out the use case
+        unset($connectionsConfig['clusters']); // yup, no clustering support atm
 
-        foreach ($connectionsConfig as $connection => $config) {
+        foreach (array_keys($connectionsConfig) as $connection) {
             $checks[$connection] = $this->checkConnection($connection);
             $healthy = $healthy && $checks[$connection];
 
@@ -45,7 +47,7 @@ class RedisStatusChecker implements CheckerInterface
 
             return true;
         } catch (Throwable $e) {
-            Log::error("Redis connection '{$connection}' status check failed", ['connection' => $connection, 'e' => $e->getMessage(), 'class' => get_class($e), 'trace' => $e->getTraceAsString()]);
+            Log::warning("Redis connection '{$connection}' status check failed", ['connection' => $connection, 'e' => $e->getMessage(), 'class' => get_class($e), 'trace' => $e->getTraceAsString()]);
         }
 
         return false;

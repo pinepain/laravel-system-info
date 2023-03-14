@@ -5,23 +5,23 @@ namespace Pinepain\SystemInfo\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Pinepain\SystemInfo\Checkers\StatusChecker;
+use Pinepain\SystemInfo\Checkers\AggregateStatusChecker;
 
 
 class StatusController extends Controller
 {
-    public function __invoke(Request $request, StatusChecker $checker)
+    public function __invoke(Request $request, AggregateStatusChecker $checker)
     {
         $failFast = !$this->shouldDoFullCheck($request);
         $components = $this->getComponentsToCheck($request);
 
-        $status = $checker->check($failFast, ...$components);
+        $status = $checker->check(failFast: $failFast, components: $components);
 
         $healthy = $status->isHealthy();
 
         $values = [
             'healthy' => $healthy,
-            'label' => $healthy ? 'OK' : 'FAIL'
+            'label' => $healthy ? 'OK' : 'FAIL',
         ];
 
         if ($this->shouldShowDetails($request)) {
@@ -46,7 +46,7 @@ class StatusController extends Controller
                 $wantsToCheck = explode(',', $wantsToCheck);
             }
 
-            $wantsToCheck = array_map(fn($v) => is_string($v) ? trim($v) : '', $wantsToCheck);
+            $wantsToCheck = array_map(trim(...), $wantsToCheck);
             $checks = array_filter($wantsToCheck);
         }
 
@@ -65,7 +65,7 @@ class StatusController extends Controller
         return $wantsDetails;
     }
 
-    private function shouldDoFullCheck(Request $request):bool
+    private function shouldDoFullCheck(Request $request): bool
     {
         $fullCheckIsPrivate = config('system-info.http.full-check-is-private');
         $wantsFullCheck = $request->query->has('f') || $request->query->has('full');
