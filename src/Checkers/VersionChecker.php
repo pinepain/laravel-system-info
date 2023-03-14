@@ -14,6 +14,7 @@ class VersionChecker implements CheckerInterface
     {
         $values = array_filter([
             'name' => config('app.name'),
+            'version' => env('APP_VERSION'),
             'env' => config('app.env'),
             'hash' => env('COMMIT_HASH'),
             'deployed-at' => env('DEPLOYED_AT'),
