@@ -39,7 +39,11 @@ class AccessJsonPropertyMiddleware
 
             $values = $value;
             if (is_scalar($values) && $this->wantsScalar($request)) {
-                return response($value, $response->status(), ['Content-Type' => 'text/plain']);
+                if (is_bool($value)) {
+                    $value = json_encode($value); // we treat boolean scalar same as they are in json
+                }
+
+                return response((string)$value, $response->status(), ['Content-Type' => 'text/plain']);
             } else {
                 return $response->setData($values);
             }
