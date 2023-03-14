@@ -46,7 +46,7 @@ class StatusCommand extends Command
             }
         }
 
-        return (int)$res->isHealthy();
+        return (int)!$res->isHealthy();
     }
 
 }

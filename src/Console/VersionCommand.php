@@ -21,6 +21,6 @@ class VersionCommand extends Command
             $this->info("{$k} = {$v}");
         }
 
-        return (int)$res->isHealthy();
+        return (int)!$res->isHealthy();
     }
 }
