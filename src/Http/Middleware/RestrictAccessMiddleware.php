@@ -53,7 +53,7 @@ class RestrictAccessMiddleware
 
         if (false !== ($pos = array_search('private', $allowedIps))) {
             unset($allowedIps[$pos]);
-            $allowedIps = array_merge($this->privateLocations);
+            $allowedIps = array_merge($this->privateLocations, $allowedIps);
         }
 
         $allowedIps = array_unique($allowedIps);
