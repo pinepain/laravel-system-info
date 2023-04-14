@@ -15,14 +15,16 @@ class CacheStatusChecker implements CheckerInterface
         return 'cache';
     }
 
-    public function check(bool $failFast = true): Result
+    public function check(mixed ...$args): Result
     {
+        $failFast = $args['failFast'] ?? true;
+
         $checks = [];
         $healthy = true;
 
-        $storeConfigs = config('cache.stores');
+        $storeConfigs = array_keys(config('cache.stores') ?? []);
 
-        foreach ($storeConfigs as $store => $config) {
+        foreach ($storeConfigs as $store) {
             $checks[$store] = $this->checkStore($store);
             $healthy = $healthy && $checks[$store];
 
@@ -37,11 +39,11 @@ class CacheStatusChecker implements CheckerInterface
     private function checkStore(string $store): bool
     {
         try {
-            Cache::store($store)->get('system-info-nonexistent-' . time() . '-' . rand());
+            Cache::store($store)->get('pinepain/laravel-system-info.check.cache.' . time());
 
             return true;
         } catch (Throwable $e) {
-            Log::error("Cache store '{$store}' status check failed", ['store' => $store, 'e' => $e->getMessage(), 'class' => get_class($e), 'trace' => $e->getTraceAsString()]);
+            Log::warning("Cache store '{$store}' status check failed", ['store' => $store, 'e' => $e->getMessage(), 'class' => get_class($e), 'trace' => $e->getTraceAsString()]);
         }
 
         return false;

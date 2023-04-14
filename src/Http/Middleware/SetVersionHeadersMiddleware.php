@@ -7,7 +7,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Pinepain\SystemInfo\Checkers\VersionChecker;
-use Symfony\Component\HttpFoundation\IpUtils;
 
 
 class SetVersionHeadersMiddleware
@@ -49,6 +48,6 @@ class SetVersionHeadersMiddleware
             return true;
         }
 
-        return IpUtils::checkIp($request->ip(), (array)config('system-info.http.allowed-ips', []));
+        return (bool)$request->user();
     }
 }

@@ -1,0 +1,60 @@
+name: Run tests
+
+on: [ push ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php-version: '8.1'
+            laravel-version: '9.*'
+          - php-version: '8.2'
+            laravel-version: '9.*'
+
+          - php-version: '8.1'
+            laravel-version: '10.*'
+          - php-version: '8.2'
+            laravel-version: '10.*'
+
+    services:
+      redis:
+        image: redis
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+        ports: [ "6379:6379" ]
+      postgres:
+        image: postgres
+        env: { POSTGRES_PASSWORD: rootpswd }
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports: [ "5432:5432" ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: phplint, infection
+
+      - name: Run lint
+        run: phplint --exclude=vendor -v .
+
+      - name: Require laravel
+        run: composer require "laravel/framework:${{ matrix.laravel-version }}" --no-update
+
+      - name: Install dependencies
+        run: composer update --no-suggest --prefer-dist
+
+      #      - name: Run static tests
+      #        run: ./vendor/bin/phpstan analyse --memory-limit=1G --error-format=github
+
+      - name: Run unit tests
+        run: ./vendor/bin/phpunit --testdox --coverage-text
+
+      - name: Run Mutational tests
+        run: |
+          infection -s -v

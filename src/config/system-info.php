@@ -1,22 +1,40 @@
 <?php declare(strict_types=1);
 
 return [
+    'status-checkers' => [
+        \Pinepain\SystemInfo\Checkers\DatabasesStatusChecker::class,
+        \Pinepain\SystemInfo\Checkers\RedisStatusChecker::class,
+        \Pinepain\SystemInfo\Checkers\CacheStatusChecker::class,
+        \Pinepain\SystemInfo\Checkers\SessionStatusChecker::class,
+    ],
+    'version' => [
+        'version' => env('APP_VERSION'),
+        'hash' => env('COMMIT_HASH'),
+        'deployed-at' => env('DEPLOYED_AT'),
+        'built-at' => env('BUILT_AT'),
+        'host' => gethostname(),
+    ],
     'http' => [
         // Root path for all HTTP endpoints, be careful if you cache routes since if you would set
         // different config value after caching routes, it won't have any effect.
         'root-path' => env('SYSTEM_INFO__HTTP_PATH', 'system-info'),
+
         // When false, would allow to execute complete status checks for non-authorized requests
         // By default fail-fast approach is used and full check allows to continue checking
         'full-check-is-private' => env('SYSTEM_INFO__FULL_CHECK_IS_PRIVATE', true),
+
         // When false, would allow to execute granular status checks for non-authorized requests
         'custom-checks-are-private' => env('SYSTEM_INFO__CUSTOM_CHECKS_ARE_PRIVATE', true),
+
         // When false, would allow to view status check details for non-authorized requests
         'details-are-private' => env('SYSTEM_INFO__DETAILS_ARE_PRIVATE', true),
+
         // When false, would include version headers for non-authorized requests
         'version-is-private' => env('SYSTEM_INFO__VERSION_IS_PRIVATE', true),
 
         // A list of restricted IPs where system-info/* endpoints are available
         'allowed-ips' => env('SYSTEM_INFO__ALLOWED_IPS', 'private'),
+
         // A list of restricted token to be used for authorizing when accessing from public locations
         'allowed-tokens' => env('SYSTEM_INFO__ACCESS_TOKENS', ''),
 

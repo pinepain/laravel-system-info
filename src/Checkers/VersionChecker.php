@@ -10,18 +10,19 @@ class VersionChecker implements CheckerInterface
         return 'version';
     }
 
-    public function check(bool $failFast = true): Result
+    public function check(mixed ...$args): Result
     {
-        $values = array_filter([
-            'name' => config('app.name'),
-            'version' => env('APP_VERSION'),
-            'env' => config('app.env'),
-            'hash' => env('COMMIT_HASH'),
-            'deployed-at' => env('DEPLOYED_AT'),
-            'built-at' => env('BUILT_AT'),
-            'host' => gethostname(),
-        ]);
+        $values = array_filter(
+            array_merge(
+                [
+                    'name' => config('app.name'),
+                    'env' => config('app.env'),
+                ],
+                config('system-info.version')
+            )
+        );
 
         return new Result(!empty($values), $values);
     }
 }
+

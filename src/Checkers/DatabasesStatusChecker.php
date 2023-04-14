@@ -15,8 +15,10 @@ class DatabasesStatusChecker implements CheckerInterface
         return 'db';
     }
 
-    public function check(bool $failFast = true): Result
+    public function check(mixed ...$args): Result
     {
+        $failFast = $args['failFast'] ?? true;
+
         $checks = [];
         $healthy = true;
 
@@ -52,7 +54,7 @@ class DatabasesStatusChecker implements CheckerInterface
 
             return true;
         } catch (Throwable $e) {
-            Log::error("Database connection '{$connection}' status check failed", ['connection' => $connection, 'e' => $e->getMessage(), 'class' => get_class($e), 'trace' => $e->getTraceAsString()]);
+            Log::warning("Database connection '{$connection}' status check failed", ['connection' => $connection, 'e' => $e->getMessage(), 'class' => get_class($e), 'trace' => $e->getTraceAsString()]);
         }
 
         return false;
