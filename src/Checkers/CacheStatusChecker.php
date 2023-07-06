@@ -22,9 +22,11 @@ class CacheStatusChecker implements CheckerInterface
         $checks = [];
         $healthy = true;
 
-        $storeConfigs = array_keys(config('cache.stores') ?? []);
+        foreach (config('cache.stores') as $store => $config) {
+            if (isset($config['skip-health-check']) && $config['skip-health-check']) {
+                continue;
+            }
 
-        foreach ($storeConfigs as $store) {
             $checks[$store] = $this->checkStore($store);
             $healthy = $healthy && $checks[$store];
 
