@@ -246,6 +246,28 @@ class CacheStatusCheckerTest extends TestCase
         $this->assertSame(['first' => false, 'second' => true], $result->getDetails());
     }
 
+    public function testCheckingWithSkip()
+    {
+        config()->set('cache.stores', ['first' => ['skip-health-check' => true], 'second' => []]);
+
+        $second = $this->mock(CacheInterface::class);
+        $second->expects('get')
+            ->once()
+            ->withAnyArgs()
+            ->andReturnTrue();
+
+        Cache::shouldReceive('store')
+            ->once()
+            ->withArgs(['second'])
+            ->andReturn($second);
+
+        $checker = new CacheStatusChecker();
+        $result = $checker->check();
+
+        $this->assertTrue($result->isHealthy());
+        $this->assertSame(['second' => true], $result->getDetails());
+    }
+
     public function testCheckIsDoneByRetrievingGeneratedKey()
     {
         config()->set('cache.stores', ['test' => []]);
