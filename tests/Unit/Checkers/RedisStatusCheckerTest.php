@@ -245,4 +245,27 @@ class RedisStatusCheckerTest extends TestCase
         $this->assertFalse($result->isHealthy());
         $this->assertSame(['first' => false, 'second' => true], $result->getDetails());
     }
+
+    public function testCheckingWithSkip()
+    {
+        config()->set('database.redis', ['first' => ['skip-health-check' => true], 'second' => []]);
+
+        $second = $this->mock(Connection::class);
+        $second->expects('command')
+            ->once()
+            ->withArgs(['ping'])
+            ->andReturnTrue();
+
+        Redis::shouldReceive('connection')
+            ->once()
+            ->withArgs(['second'])
+            ->andReturn($second);
+
+        $checker = new RedisStatusChecker();
+        $result = $checker->check();
+
+        $this->assertTrue($result->isHealthy());
+        $this->assertSame(['second' => true], $result->getDetails());
+    }
+
 }

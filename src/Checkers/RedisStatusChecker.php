@@ -28,7 +28,11 @@ class RedisStatusChecker implements CheckerInterface
         unset($connectionsConfig['options']);
         unset($connectionsConfig['clusters']); // yup, no clustering support atm
 
-        foreach (array_keys($connectionsConfig) as $connection) {
+        foreach ($connectionsConfig as $connection => $config) {
+            if (isset($config['skip-health-check']) && $config['skip-health-check']) {
+                continue;
+            }
+
             $checks[$connection] = $this->checkConnection($connection);
             $healthy = $healthy && $checks[$connection];
 

@@ -25,6 +25,10 @@ class DatabasesStatusChecker implements CheckerInterface
         $connectionsConfig = config('database.connections');
 
         foreach ($connectionsConfig as $connection => $config) {
+            if (isset($config['skip-health-check']) && $config['skip-health-check']) {
+                continue;
+            }
+
             if (array_key_exists('read', $config) && array_key_exists('write', $config)) {
                 foreach (["{$connection}::read", "{$connection}::write"] as $c) {
                     $checks[$c] = $this->checkConnection($c);

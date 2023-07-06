@@ -100,6 +100,28 @@ class DatabasesStatusCheckerTest extends TestCase
         $this->assertSame(['first' => false], $result->getDetails());
     }
 
+    public function testCheckingWithSkip()
+    {
+        config()->set('database.connections', ['first' => ['skip-health-check' => true], 'second' => []]);
+
+        $second = $this->mock(Connection::class);
+        $second->expects('getPdo')
+            ->once()
+            ->withNoArgs()
+            ->andReturnTrue();
+
+        DB::shouldReceive('connection')
+            ->once()
+            ->withArgs(['second'])
+            ->andReturn($second);
+
+        $checker = new DatabasesStatusChecker();
+        $result = $checker->check();
+
+        $this->assertTrue($result->isHealthy());
+        $this->assertSame(['second' => true], $result->getDetails());
+    }
+
     public function testCheckingFailingMultipleConnectionsWithoutFailFast()
     {
         config()->set('database.connections', ['first' => [], 'second' => []]);
