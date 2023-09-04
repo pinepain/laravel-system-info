@@ -167,6 +167,62 @@ class RedisStatusCheckerTest extends TestCase
         $this->assertSame(['first' => false, 'second' => false], $result->getDetails());
     }
 
+    /**
+     * @dataProvider isStrictProvider
+     */
+    public function testCheckingFailingOptionalConnection($isStrict)
+    {
+        config()->set('database.redis', ['first' => ['optional-health-check' => true], 'second' => []]);
+
+        Redis::shouldReceive('connection')
+            ->once()
+            ->withArgs(['first'])
+            ->andThrow(new RuntimeException('Test exception - first'));
+
+        $second = $this->mock(Connection::class);
+        $second->expects('command')
+            ->once()
+            ->withArgs(['ping'])
+            ->andReturnTrue();
+
+        Redis::shouldReceive('connection')
+            ->once()
+            ->withArgs(['second'])
+            ->andReturn($second);
+
+        Log::shouldReceive('warning')
+            ->once()
+            ->withArgs(function ($message, $args) {
+                if ("Redis connection 'first' status check failed" != $message) {
+                    return false;
+                }
+                if ('first' != $args['connection']) {
+                    return false;
+                }
+                if ('Test exception - first' != $args['e']) {
+                    return false;
+                }
+                if ('RuntimeException' != $args['class']) {
+                    return false;
+                }
+
+                if (!str_starts_with($args['trace'], '#0')) {
+                    return false;
+                }
+
+                return true;
+            });
+
+        $checker = new RedisStatusChecker();
+        $result = match ($isStrict) {
+            null => $checker->check(failFast: false),
+            default => $checker->check(failFast: false, strict: $isStrict),
+        };
+
+        $this->assertSame(!$isStrict, $result->isHealthy());
+        $this->assertSame(['first' => false, 'second' => true], $result->getDetails());
+    }
+
     public function testCheckingPassingSingleConnection()
     {
         config()->set('database.redis', ['first' => []]);
@@ -268,4 +324,12 @@ class RedisStatusCheckerTest extends TestCase
         $this->assertSame(['second' => true], $result->getDetails());
     }
 
+    public static function isStrictProvider(): array
+    {
+        return [
+            [null],
+            [true],
+            [false],
+        ];
+    }
 }

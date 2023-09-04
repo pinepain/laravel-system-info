@@ -189,6 +189,62 @@ class DatabasesStatusCheckerTest extends TestCase
         $this->assertSame(['first' => false, 'second' => false], $result->getDetails());
     }
 
+    /**
+     * @dataProvider isStrictProvider
+     */
+    public function testCheckingFailingOptionalConnection($isStrict)
+    {
+        config()->set('database.connections', ['first' => ['optional-health-check' => true], 'second' => []]);
+
+        DB::shouldReceive('connection')
+            ->once()
+            ->withArgs(['first'])
+            ->andThrow(new RuntimeException('Test exception - first'));
+
+        $second = $this->mock(Connection::class);
+        $second->expects('getPdo')
+            ->once()
+            ->withNoArgs()
+            ->andReturnTrue();
+
+        DB::shouldReceive('connection')
+            ->once()
+            ->withArgs(['second'])
+            ->andReturn($second);
+
+        Log::shouldReceive('warning')
+            ->once()
+            ->withArgs(function ($message, $args) {
+                if ("Database connection 'first' status check failed" != $message) {
+                    return false;
+                }
+                if ('first' != $args['connection']) {
+                    return false;
+                }
+                if ('Test exception - first' != $args['e']) {
+                    return false;
+                }
+                if ('RuntimeException' != $args['class']) {
+                    return false;
+                }
+
+                if (!str_starts_with($args['trace'], '#0')) {
+                    return false;
+                }
+
+                return true;
+            });
+
+        $checker = new DatabasesStatusChecker();
+        $result = match ($isStrict) {
+            null => $checker->check(failFast: false),
+            default => $checker->check(failFast: false, strict: $isStrict),
+        };
+
+        $this->assertSame(!$isStrict, $result->isHealthy());
+        $this->assertSame(['first' => false, 'second' => true], $result->getDetails());
+    }
+
     public function testCheckingPassingSingleConnection()
     {
         config()->set('database.connections', ['first' => []]);
@@ -453,4 +509,12 @@ class DatabasesStatusCheckerTest extends TestCase
         $this->assertSame(['test::read' => false, 'test::write' => true, 'second' => true], $result->getDetails());
     }
 
+    public static function isStrictProvider(): array
+    {
+        return [
+            [null],
+            [true],
+            [false],
+        ];
+    }
 }

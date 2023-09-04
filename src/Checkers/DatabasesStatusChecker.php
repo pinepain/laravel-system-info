@@ -18,6 +18,7 @@ class DatabasesStatusChecker implements CheckerInterface
     public function check(mixed ...$args): Result
     {
         $failFast = $args['failFast'] ?? true;
+        $isStrict = $args['strict'] ?? false;
 
         $checks = [];
         $healthy = true;
@@ -29,10 +30,12 @@ class DatabasesStatusChecker implements CheckerInterface
                 continue;
             }
 
+            $isOptional = (isset($config['optional-health-check']) && $config['optional-health-check']) && !$isStrict;
+
             if (array_key_exists('read', $config) && array_key_exists('write', $config)) {
                 foreach (["{$connection}::read", "{$connection}::write"] as $c) {
                     $checks[$c] = $this->checkConnection($c);
-                    $healthy = $healthy && $checks[$c];
+                    $healthy = $healthy && ($checks[$c] || $isOptional);
 
                     if (!$healthy && $failFast) {
                         break 2;
@@ -40,7 +43,7 @@ class DatabasesStatusChecker implements CheckerInterface
                 }
             } else {
                 $checks[$connection] = $this->checkConnection($connection);
-                $healthy = $healthy && $checks[$connection];
+                $healthy = $healthy && ($checks[$connection] || $isOptional);
 
                 if (!$healthy && $failFast) {
                     break;

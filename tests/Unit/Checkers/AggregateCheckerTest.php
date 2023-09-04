@@ -3,7 +3,6 @@
 namespace Pinepain\SystemInfo\Tests\Unit\Checkers;
 
 
-use Closure;
 use Orchestra\Testbench\TestCase;
 use Pinepain\SystemInfo\Checkers\AggregateStatusChecker;
 use Pinepain\SystemInfo\Checkers\CheckerInterface;
@@ -68,6 +67,17 @@ class AggregateCheckerTest extends TestCase
         $this->assertSame(['first' => $firstResult, 'second' => $secondResult], $result->getDetails());
     }
 
+    public function testCheckStrictIsPassedDown()
+    {
+        $first = $this->getChecker('first', true, $firstResult = new Result(true), true);
+        $second = $this->getChecker('second', true, $secondResult = new Result(true), true);
+
+        $checker = new AggregateStatusChecker($first, $second);
+        $result = $checker->check(strict: true);
+
+        $this->assertTrue($result->isHealthy());
+        $this->assertSame(['first' => $firstResult, 'second' => $secondResult], $result->getDetails());
+    }
 
     public function testCheckSpecificComponents()
     {
@@ -81,14 +91,15 @@ class AggregateCheckerTest extends TestCase
         $this->assertSame(['second' => $secondResult], $result->getDetails());
     }
 
-    private function getChecker(string $name, bool $expectedToFailFast, Result $result): CheckerInterface
+    private function getChecker(string $name, bool $expectedToFailFast, Result $result, bool $expectedIsStrict = false): CheckerInterface
     {
-        $test = fn(...$args) => $this->assertSame($expectedToFailFast, $args['failFast']);
+        $tests = [
+            fn(...$args) => $this->assertSame($expectedToFailFast, ($args['failFast'] ?? false)),
+            fn(...$args) => $this->assertSame($expectedIsStrict, ($args['strict'] ?? false)),
+        ];
 
-        return new class($name, $result, $test) implements CheckerInterface {
-            public function __construct(private string $name, private Result $result, private Closure $test)
-            {
-            }
+        return new class($name, $result, $tests) implements CheckerInterface {
+            public function __construct(private string $name, private Result $result, private array $tests) {}
 
             public function getName(): string
             {
@@ -97,7 +108,9 @@ class AggregateCheckerTest extends TestCase
 
             public function check(...$args): Result
             {
-                call_user_func($this->test, ...$args);
+                foreach ($this->tests as $t) {
+                    call_user_func($t, ...$args);
+                }
 
                 return $this->result;
             }

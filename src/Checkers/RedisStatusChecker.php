@@ -18,6 +18,7 @@ class RedisStatusChecker implements CheckerInterface
     public function check(mixed ...$args): Result
     {
         $failFast = $args['failFast'] ?? true;
+        $isStrict = $args['strict'] ?? false;
 
         $checks = [];
         $healthy = true;
@@ -33,8 +34,10 @@ class RedisStatusChecker implements CheckerInterface
                 continue;
             }
 
+            $isOptional = (isset($config['optional-health-check']) && $config['optional-health-check']) && !$isStrict;
+
             $checks[$connection] = $this->checkConnection($connection);
-            $healthy = $healthy && $checks[$connection];
+            $healthy = $healthy && ($checks[$connection] || $isOptional);
 
             if (!$healthy && $failFast) {
                 break;

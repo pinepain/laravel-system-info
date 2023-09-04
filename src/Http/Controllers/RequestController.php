@@ -19,6 +19,7 @@ class RequestController extends Controller
         $values['scheme'] = $request->getScheme();
         $values['host'] = $request->getHost();
         $values['port'] = $request->getPort();
+        $values['path'] = $request->getPathInfo();
         $values['query'] = $request->query();
 
         $values['ip'] = $request->ip();
