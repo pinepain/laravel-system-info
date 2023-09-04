@@ -23,6 +23,7 @@ class AggregateStatusChecker implements CheckerInterface
     public function check(mixed ...$args): Result
     {
         $failFast = $args['failFast'] ?? true;
+        $isStrict = $args['strict'] ?? false;
         $components = $args['components'] ?? [];
 
         $checks = [];
@@ -34,7 +35,7 @@ class AggregateStatusChecker implements CheckerInterface
         }
 
         foreach ($checkers as $name => $checker) {
-            $result = $checker->check(failFast: $failFast);
+            $result = $checker->check(failFast: $failFast, strict: $isStrict);
             $checks[$name] = $result;
             $healthy = $healthy && $result->isHealthy();
 

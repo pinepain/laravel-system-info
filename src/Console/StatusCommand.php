@@ -4,21 +4,26 @@ namespace Pinepain\SystemInfo\Console;
 
 
 use Illuminate\Console\Command;
-use Pinepain\SystemInfo\Checkers\Result;
 use Pinepain\SystemInfo\Checkers\AggregateStatusChecker;
+use Pinepain\SystemInfo\Checkers\Result;
 
 
 class StatusCommand extends Command
 {
     protected $signature = 'system-info:status {components?* : Individual component names to check }
             {--fast : Fail fast on first faulty component}
+            {--strict : Run checks in a strict mode so even optional one would cause failure}
     ';
 
     protected $description = 'Output app status';
 
     public function handle(AggregateStatusChecker $checker)
     {
-        $res = $checker->check($this->option('fast'), ...$this->argument('components'));
+        $res = $checker->check(
+            failFast: $this->option('fast'),
+            strict: $this->option('strict'),
+            components: $this->argument('components'),
+        );
 
         if (!$res->isHealthy()) {
             $this->error('FAIL', 'quiet');

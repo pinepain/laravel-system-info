@@ -13,9 +13,10 @@ class StatusController extends Controller
     public function __invoke(Request $request, AggregateStatusChecker $checker)
     {
         $failFast = !$this->shouldDoFullCheck($request);
+        $strict = !$this->shouldBeStrict($request);
         $components = $this->getComponentsToCheck($request);
 
-        $status = $checker->check(failFast: $failFast, components: $components);
+        $status = $checker->check(failFast: $failFast, optional: $strict, components: $components);
 
         $healthy = $status->isHealthy();
 
@@ -75,5 +76,10 @@ class StatusController extends Controller
         }
 
         return $wantsFullCheck;
+    }
+
+    private function shouldBeStrict(Request $request): bool
+    {
+        return $request->query->has('s') || $request->query->has('strict');
     }
 }
