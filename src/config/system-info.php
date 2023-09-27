@@ -13,6 +13,7 @@ return [
         'deployed-at' => env('DEPLOYED_AT'),
         'built-at' => env('BUILT_AT'),
         'host' => gethostname(),
+        'netid' => env('APP_NAME', 'unknown') . ' <' . substr(env('COMMIT_HASH', 'unknown'), 0, 7) . '>' . ' (' . env('APP_ENV', 'production') . ')',
     ],
     'http' => [
         // Root path for all HTTP endpoints, be careful if you cache routes since if you would set
