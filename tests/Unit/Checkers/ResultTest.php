@@ -3,15 +3,14 @@
 namespace Pinepain\SystemInfo\Tests\Unit\Checkers;
 
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Pinepain\SystemInfo\Checkers\Result;
 
 
 class ResultTest extends TestCase
 {
-    /**
-     * @dataProvider variationsProvider
-     */
+    #[DataProvider('variationsProvider')]
     public function testVariations(bool $status, array $details)
     {
         $result = new Result($status, $details);

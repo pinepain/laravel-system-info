@@ -7,6 +7,7 @@ use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Orchestra\Testbench\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Pinepain\SystemInfo\Checkers\CheckerInterface;
 use Pinepain\SystemInfo\Checkers\RedisStatusChecker;
 use RuntimeException;
@@ -167,9 +168,7 @@ class RedisStatusCheckerTest extends TestCase
         $this->assertSame(['first' => false, 'second' => false], $result->getDetails());
     }
 
-    /**
-     * @dataProvider isStrictProvider
-     */
+    #[DataProvider('isStrictProvider')]
     public function testCheckingFailingOptionalConnection($isStrict)
     {
         config()->set('database.redis', ['first' => ['optional-health-check' => true], 'second' => []]);
