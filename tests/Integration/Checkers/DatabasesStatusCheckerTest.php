@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Integration\Checkers;
+namespace Pinepain\SystemInfo\Tests\Integration\Checkers;
 
 
 use Orchestra\Testbench\TestCase;
