@@ -28,6 +28,9 @@ jobs:
           - php-version: '8.4'
             laravel-version: '12.*'
 
+          - php-version: '8.5'
+            laravel-version: '12.*'
+
     services:
       redis:
         image: redis

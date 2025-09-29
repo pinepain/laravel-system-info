@@ -21,6 +21,7 @@ use Pinepain\SystemInfo\Http\Controllers\TimeController;
 use Pinepain\SystemInfo\Http\Controllers\VersionController;
 use Pinepain\SystemInfo\Http\Middleware\AccessJsonPropertyMiddleware;
 use Pinepain\SystemInfo\Http\Middleware\CacheHeadersMiddleware;
+use Pinepain\SystemInfo\Http\Middleware\ExcludeFromNewrelicMiddleware;
 use Pinepain\SystemInfo\Http\Middleware\MaybePrettyJsonMiddleware;
 use Pinepain\SystemInfo\Http\Middleware\RestrictAccessMiddleware;
 use Pinepain\SystemInfo\Http\Middleware\SetVersionHeadersMiddleware;
@@ -67,7 +68,7 @@ class SystemInfoServiceProvider extends ServiceProvider
 
         if (!$this->app->routesAreCached() && config('system-info.http.root-path')) {
             Route::middleware([
-                RestrictAccessMiddleware::class,
+                ExcludeFromNewrelicMiddleware::class,
                 RestrictAccessMiddleware::class,
                 CacheHeadersMiddleware::class,
                 AccessJsonPropertyMiddleware::class,
