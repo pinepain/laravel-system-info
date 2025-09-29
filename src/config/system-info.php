@@ -23,14 +23,14 @@ return [
         // different config value after caching routes, it won't have any effect.
         'root-path' => env('SYSTEM_INFO__HTTP_PATH', 'system-info'),
 
-        // When false, would allow to execute complete status checks for non-authorized requests
+        // When false, would allow executing complete status checks for non-authorized requests
         // By default fail-fast approach is used and full check allows to continue checking
         'full-check-is-private' => env('SYSTEM_INFO__FULL_CHECK_IS_PRIVATE', true),
 
-        // When false, would allow to execute granular status checks for non-authorized requests
+        // When false, would allow executing granular status checks for non-authorized requests
         'custom-checks-are-private' => env('SYSTEM_INFO__CUSTOM_CHECKS_ARE_PRIVATE', true),
 
-        // When false, would allow to view status check details for non-authorized requests
+        // When false, would allow viewing status check details for non-authorized requests
         'details-are-private' => env('SYSTEM_INFO__DETAILS_ARE_PRIVATE', true),
 
         // When false, would include version headers for non-authorized requests
@@ -43,7 +43,7 @@ return [
         'allowed-tokens' => env('SYSTEM_INFO__ACCESS_TOKENS', ''),
 
         // A list of system-info.* family routes that available from non-restricted IPs and available GET params.
-        // When params is true, all GET params are passed through. When it's array, key denotes allowed GET param names
+        // When params are true, all GET params are passed through. When it's array, key denotes allowed GET param names
         // and value hardcode the value or allows any value to be passed when '*'.
         'public-routes' => [
             'system-info.version' => env('SYSTEM_INFO__VERSION_IS_PUBLIC', false),
