@@ -15,6 +15,9 @@ return [
         'host' => gethostname(),
         'netid' => env('APP_NAME', 'unknown') . ' <' . substr(env('COMMIT_HASH', 'unknown'), 0, 7) . '>' . ' (' . env('APP_ENV', 'production') . ')',
     ],
+    'newrelic' => [
+        'web' => env('SYSTEM_INFO__NEWRELIC_WEB', true),
+    ],
     'http' => [
         // Root path for all HTTP endpoints, be careful if you cache routes since if you would set
         // different config value after caching routes, it won't have any effect.
